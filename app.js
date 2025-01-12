@@ -8,8 +8,15 @@ const app = express();
 
 // middlewares
 app.use(morgan("common"));
-
 app.use(express.json());
+
+app.use(
+  fileUpload({
+    limits: { fileSize: 50 * 1024 * 1024 },
+    useTempFiles: false,
+    preserveExtension: true,
+  })
+);
 
 // controller registration
 const controllersDirPath = path.join(__dirname, "controllers");
