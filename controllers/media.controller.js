@@ -39,7 +39,7 @@ module.exports = (() => {
         });
         res.json({
           message: response?.message || "uploaded!",
-          fileId: response.filesIds,
+          fileId: response.filesIds[0],
         });
       }
     } catch (exception) {
@@ -47,7 +47,7 @@ module.exports = (() => {
     }
   });
 
-  router.post("/download/:fileId", async (req, res, next) => {
+  router.get("/download/:fileId", async (req, res, next) => {
     const fileId = req.params.fileId;
     if (!fileId) {
       return res.status(400).json({ message: "File id is required" });
