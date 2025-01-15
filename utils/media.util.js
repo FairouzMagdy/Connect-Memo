@@ -1,6 +1,9 @@
 const path = require("path");
 
-module.exports.imageKitPayloadBuilder = (expressUploadedFile) => {
+module.exports.imageKitPayloadBuilder = (
+  expressUploadedFile,
+  fileType = "other"
+) => {
   const originalExtension = path.extname(expressUploadedFile.name);
   const originalName = path.basename(
     expressUploadedFile.name,
@@ -12,5 +15,6 @@ module.exports.imageKitPayloadBuilder = (expressUploadedFile) => {
   return {
     fileName: newFileName,
     src: expressUploadedFile?.data,
+    type: fileType,
   };
 };

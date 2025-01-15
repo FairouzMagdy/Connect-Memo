@@ -1,8 +1,8 @@
 const MemoryRepository = require("../repos/memory.repo");
 
 class MemoryService {
-  async createMemory(memoryData, userId) {
-    return await MemoryRepository.createMemory(memoryData, userId);
+  async createMemory(memoryData, userId, files = {}) {
+    return await MemoryRepository.createMemory(memoryData, userId, files);
   }
 
   async getUserMemories(userId, filterPublic = true) {
@@ -13,8 +13,13 @@ class MemoryService {
     return await MemoryRepository.getMemoryById(memoryId, userId);
   }
 
-  async updateMemory(memoryId, userId, newData) {
-    return await MemoryRepository.updateMemory(memoryId, userId, newData);
+  async updateMemory(memoryId, userId, newData, files = {}) {
+    return await MemoryRepository.updateMemory(
+      memoryId,
+      userId,
+      newData,
+      files
+    );
   }
 
   async deleteMemory(memoryId, userId) {

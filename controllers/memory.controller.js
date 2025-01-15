@@ -104,7 +104,17 @@ class MemoryController {
 
   async createMemory(req, res, next) {
     try {
-      const newMemory = await MemoryService.createMemory(req.body, req.user.id);
+      const files = {
+        images: req.files?.images || [],
+        multimedia: req.files?.multimedia || [],
+      };
+
+      const newMemory = await MemoryService.createMemory(
+        req.body,
+        req.user.id,
+        files
+      );
+
       res.status(201).json({
         message: "success",
         newMemory,
@@ -119,10 +129,16 @@ class MemoryController {
 
   async updateMemory(req, res, next) {
     try {
+      const files = {
+        images: req.files?.images || [],
+        multimedia: req.files?.multimedia || [],
+      };
+
       const memory = await MemoryService.updateMemory(
         req.params.memoryId,
         req.user.id,
-        req.body
+        req.body,
+        files
       );
       if (!memory) throw new Error("No memory found with this id");
 

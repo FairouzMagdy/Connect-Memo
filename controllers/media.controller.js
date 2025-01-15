@@ -4,7 +4,7 @@ const { imageKitPayloadBuilder } = require("../utils/media.util");
 module.exports = (() => {
   const router = require("express").Router();
 
-  router.post("/upload", async (req, res, next) => {
+  router.post("/media/upload", async (req, res, next) => {
     try {
       if (!req.files || Object.keys(req.files).length === 0) {
         return res.status(400).send("No files were uploaded.");
@@ -47,7 +47,7 @@ module.exports = (() => {
     }
   });
 
-  router.get("/download/:fileId", async (req, res, next) => {
+  router.get("/media/download/:fileId", async (req, res, next) => {
     const fileId = req.params.fileId;
     if (!fileId) {
       return res.status(400).json({ message: "File id is required" });
@@ -57,6 +57,16 @@ module.exports = (() => {
     res
       .status(200)
       .json({ message: response.message, fileURL: response.url || "" });
+  });
+
+  router.delete("/media/delete/:fileId", async (req, res, next) => {
+    const fileId = req.params.fileId;
+    if (!fileId) {
+      return res.status(400).json({ message: "File id is required" });
+    }
+
+    await mediaService.deleteFile(fileId);
+    res.status(200).json({ message: "success" });
   });
 
   return router;

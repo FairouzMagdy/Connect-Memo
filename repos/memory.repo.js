@@ -1,12 +1,61 @@
 const Memory = require("../models/memory.model");
+const { mediaService } = require("../services/media.service");
+const { imageKitPayloadBuilder } = require("../utils/media.util");
 
 class MemoryRepository {
-  async createMemory(memoryData, userId) {
+  async createMemory(memoryData, userId, files = {}) {
     try {
+      if (files.images) {
+        const imageFiles = Array.isArray(files.images)
+          ? files.images
+          : [files.images];
+
+        const imageUploadPayload = imageFiles.map((file) =>
+          imageKitPayloadBuilder(file)
+        );
+
+        const imageUploadResponse = await mediaService.upload({
+          files: imageUploadPayload,
+        });
+
+        if (imageUploadResponse.message === "success") {
+          memoryData.images = imageUploadResponse.filesIds;
+        } else {
+          throw new Error("Failed to upload images");
+        }
+      }
+
+      // Handle multimedia uploads
+      if (files.multimedia) {
+        const multimediaFiles = Array.isArray(files.multimedia)
+          ? files.multimedia
+          : [files.multimedia];
+
+        const multimediaUploadPayload = multimediaFiles.map((file) => {
+          const fileType = file.mimetype.split("/")[0];
+          return imageKitPayloadBuilder(file, fileType);
+        });
+
+        const multimediaUploadResponse = await mediaService.upload({
+          files: multimediaUploadPayload,
+        });
+
+        if (multimediaUploadResponse.message === "success") {
+          memoryData.multimediaTracks = multimediaUploadResponse.filesIds.map(
+            (fileId, index) => ({
+              type: multimediaUploadPayload[index].type,
+              path: fileId,
+            })
+          );
+        } else {
+          throw new Error("Failed to upload multimedia files");
+        }
+      }
       const newMemory = await Memory.create({
         ...memoryData,
         createdBy: userId,
       });
+
       return newMemory;
     } catch (error) {
       console.error(error.message);
@@ -61,15 +110,65 @@ class MemoryRepository {
     }
   }
 
-  async updateMemory(memoryId, userId, newData) {
+  async updateMemory(memoryId, userId, newData, files = {}) {
     try {
-      const memory = await Memory.findOneAndUpdate(
+      const memory = await Memory.findOne({ _id: memoryId, createdBy: userId });
+      if (!memory) throw new Error("No memory found with this id");
+
+      if (files.images) {
+        const imageFiles = Array.isArray(files.images)
+          ? files.images
+          : [files.images];
+
+        const imageUploadPayload = imageFiles.map((file) =>
+          imageKitPayloadBuilder(file)
+        );
+
+        const imageUploadResponse = await mediaService.upload({
+          files: imageUploadPayload,
+        });
+
+        if (imageUploadResponse.message === "success") {
+          newData.images = imageUploadResponse.filesIds;
+        } else {
+          throw new Error("Failed to upload images");
+        }
+      }
+
+      // Handle multimedia uploads
+      if (files.multimedia) {
+        const multimediaFiles = Array.isArray(files.multimedia)
+          ? files.multimedia
+          : [files.multimedia];
+
+        const multimediaUploadPayload = multimediaFiles.map((file) => {
+          const fileType = file.mimetype.split("/")[0];
+          return imageKitPayloadBuilder(file, fileType);
+        });
+
+        const multimediaUploadResponse = await mediaService.upload({
+          files: multimediaUploadPayload,
+        });
+
+        if (multimediaUploadResponse.message === "success") {
+          newData.multimediaTracks = multimediaUploadResponse.filesIds.map(
+            (fileId, index) => ({
+              type: multimediaUploadPayload[index].type,
+              path: fileId,
+            })
+          );
+        } else {
+          throw new Error("Failed to upload multimedia files");
+        }
+      }
+
+      const updatedMemory = await Memory.findOneAndUpdate(
         { _id: memoryId, createdBy: userId },
         newData,
         { new: true, runValidators: true }
       );
-      if (!memory) throw new Error("No memory found with this id");
-      return memory;
+
+      return updatedMemory;
     } catch (error) {
       console.error(error.message);
     }
@@ -77,14 +176,39 @@ class MemoryRepository {
 
   async deleteMemory(memoryId, userId) {
     try {
-      const memory = await Memory.findOneAndDelete({
+      const memory = await Memory.findOne({
         _id: memoryId,
         createdBy: userId,
       });
-      if (!memory) throw new Error("No memory found with this id");
-      return memory;
+
+      if (!memory) {
+        throw new Error("Memory not found");
+      }
+
+      const mediaFileIds = [
+        ...memory.images,
+        ...memory.multimediaTracks.map((track) => track.path),
+      ];
+
+      for (const fileId of mediaFileIds) {
+        try {
+          const deleteResponse = await mediaService.deleteFile(fileId);
+
+          if (deleteResponse.message !== "success") {
+            console.error(`Failed to delete file ${fileId}`);
+          }
+        } catch (error) {
+          console.error(`Error deleting file ${fileId}:`, error);
+        }
+      }
+
+      return await Memory.findOneAndDelete({
+        _id: memoryId,
+        createdBy: userId,
+      });
     } catch (error) {
-      console.error(error.message);
+      console.error("Error deleting memory:", error);
+      throw error;
     }
   }
 

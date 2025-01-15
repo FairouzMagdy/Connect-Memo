@@ -56,9 +56,17 @@ async function download(fileId) {
   }
 }
 
-// get file details
+async function deleteFile(fileId) {
+  try {
+    await imagekit.deleteFile(fileId);
+    return { message: "success" };
+  } catch (error) {
+    console.error(error);
+  }
+}
 
 module.exports.mediaService = {
   upload,
   download,
+  deleteFile,
 };
