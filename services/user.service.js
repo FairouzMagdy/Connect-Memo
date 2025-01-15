@@ -20,6 +20,14 @@ class UserService {
   async deleteUser(userId) {
     return await UserRepository.deleteUser(userId);
   }
+
+  async updateMe(userId, newData) {
+    return await UserRepository.updateMe(userId, newData);
+  }
+
+  async deleteMe(userId) {
+    return await UserRepository.deleteMe(userId);
+  }
 }
 
 module.exports = new UserService();

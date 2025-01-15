@@ -73,6 +73,36 @@ class UserRepository {
       throw new Error("Failed to delete user");
     }
   }
+
+  async updateMe(userId, newData) {
+    try {
+      if (newData.password || newData.passwordConfirm)
+        throw new Error(
+          "This route is not for updating passwords, please use /updateMyPassword"
+        );
+
+      const user = await User.findByIdAndUpdate({ _id: userId }, newData, {
+        new: true,
+        runValidators: true,
+      });
+
+      return user;
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async deleteMe(userId) {
+    try {
+      const user = await User.findByIdAndUpdate(
+        { _id: userId },
+        { isActive: false }
+      );
+      if (!user) throw new Error("No user found with this id"); // 400
+    } catch (error) {
+      console.error(error);
+    }
+  }
 }
 
 module.exports = new UserRepository();

@@ -14,7 +14,7 @@ class AuthRepository {
       });
       return newUser;
     } catch (error) {
-      console.error(error);
+      throw error;
     }
   }
 
@@ -30,7 +30,38 @@ class AuthRepository {
 
       return user;
     } catch (error) {
-      console.error(error);
+      throw error;
+    }
+  }
+
+  async updatePassword(userId, userData) {
+    try {
+      const user = await User.findById(userId).select("+password");
+      if (!user) throw new Error("User not found!");
+
+      if (!userData.currentPassword)
+        throw new Error("Current password must be provided!");
+
+      if (
+        !(await user.correctPassword(userData.currentPassword, user.password))
+      )
+        throw new Error("Current password is incorrect!");
+
+      const isSamePassword = await user.correctPassword(
+        userData.password,
+        user.password
+      );
+
+      if (isSamePassword)
+        throw new Error("Password must be different than current password!");
+
+      user.password = userData.password;
+      user.passwordConfirm = userData.passwordConfirm;
+      await user.save();
+
+      return user;
+    } catch (error) {
+      throw error;
     }
   }
 }

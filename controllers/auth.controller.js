@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const { APP_CONFIG } = require("../config/app.config");
 const express = require("express");
 const authService = require("../services/auth.service");
+const AuthMiddleware = require("../middlewares/auth.middleware");
 
 class AuthController {
   constructor() {
@@ -13,6 +14,11 @@ class AuthController {
   initializeRoutes() {
     this.router.post("/login", this.login.bind(this));
     this.router.post("/signup", this.signup.bind(this));
+    this.router.patch(
+      "/updateMyPassword",
+      AuthMiddleware.protect,
+      this.updatePassword.bind(this)
+    );
   }
 
   async signup(req, res, next) {
@@ -31,6 +37,18 @@ class AuthController {
     try {
       const user = await authService.login(req.body);
       if (!user) throw new Error("Invalid login");
+      this.createSendToken(user, 200, res);
+    } catch (err) {
+      res.status(400).json({
+        status: "fail",
+        message: err.message,
+      });
+    }
+  }
+  async updatePassword(req, res, next) {
+    try {
+      const user = await authService.updatePassword(req.user.id, req.body);
+
       this.createSendToken(user, 200, res);
     } catch (err) {
       res.status(400).json({
