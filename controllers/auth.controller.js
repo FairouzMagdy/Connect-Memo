@@ -1,7 +1,5 @@
 const jwt = require("jsonwebtoken");
 const { APP_CONFIG } = require("../config/app.config");
-const AuthService = require("../services/auth.service");
-const AuthMiddleware = require("../middlewares/auth.middleware");
 const express = require("express");
 const authService = require("../services/auth.service");
 
@@ -32,7 +30,6 @@ class AuthController {
   async login(req, res, next) {
     try {
       const user = await authService.login(req.body);
-      console.log(user);
       if (!user) throw new Error("Invalid login");
       this.createSendToken(user, 200, res);
     } catch (err) {

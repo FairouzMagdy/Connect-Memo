@@ -30,7 +30,7 @@ class AuthMiddleware {
       res.locals = currentUser;
       next();
     } catch (error) {
-      console.error(error);
+      res.status(400).json({ status: "fail", message: error.message });
     }
   }
 
@@ -41,7 +41,7 @@ class AuthMiddleware {
           throw new Error("You do not have permission to perform this action"); // 403
         next();
       } catch (error) {
-        console.error(error);
+        res.status(400).json({ status: "fail", message: error.message });
       }
     };
   }
