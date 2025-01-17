@@ -6,9 +6,8 @@ class UserRepository {
       const users = await User.find();
       if (!users) throw new Error("Users not found");
       return users;
-    } catch (err) {
-      console.error(err);
-      throw new Error("Failed to fetch users");
+    } catch (error) {
+      throw error;
     }
   }
 
@@ -17,9 +16,8 @@ class UserRepository {
       const user = await User.findOne({ _id: userId });
       if (!user) throw new Error("No user found with this id");
       return user;
-    } catch (err) {
-      console.error(err);
-      throw new Error("Failed to fetch user");
+    } catch (error) {
+      throw error;
     }
   }
 
@@ -37,9 +35,8 @@ class UserRepository {
       this.passwordConfirm = undefined;
 
       return newUser;
-    } catch (err) {
-      console.error(err);
-      throw new Error("Failed to create user");
+    } catch (error) {
+      throw error;
     }
   }
 
@@ -57,9 +54,8 @@ class UserRepository {
       if (!updatedUser) throw new Error("No user found with this id");
 
       return updatedUser;
-    } catch (err) {
-      console.error(err);
-      throw new Error("Failed to update user");
+    } catch (error) {
+      throw error;
     }
   }
 
@@ -68,9 +64,8 @@ class UserRepository {
       const user = await User.findByIdAndDelete({ _id: userId });
       if (!user) throw new Error("No user found with this id");
       return user;
-    } catch (err) {
-      console.error(err);
-      throw new Error("Failed to delete user");
+    } catch (error) {
+      throw error;
     }
   }
 
@@ -88,7 +83,7 @@ class UserRepository {
 
       return user;
     } catch (error) {
-      console.error(error);
+      throw error;
     }
   }
 
@@ -100,7 +95,7 @@ class UserRepository {
       );
       if (!user) throw new Error("No user found with this id"); // 400
     } catch (error) {
-      console.error(error);
+      throw error;
     }
   }
 }

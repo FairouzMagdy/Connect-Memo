@@ -25,7 +25,6 @@ class MemoryRepository {
         }
       }
 
-      // Handle multimedia uploads
       if (files.multimedia) {
         const multimediaFiles = Array.isArray(files.multimedia)
           ? files.multimedia
@@ -58,7 +57,7 @@ class MemoryRepository {
 
       return newMemory;
     } catch (error) {
-      console.error(error.message);
+      throw error;
     }
   }
 
@@ -73,7 +72,7 @@ class MemoryRepository {
 
       return memories;
     } catch (error) {
-      console.error(error.message);
+      throw error;
     }
   }
 
@@ -105,7 +104,6 @@ class MemoryRepository {
 
       return memory;
     } catch (error) {
-      console.error(error.message);
       throw error;
     }
   }
@@ -135,7 +133,6 @@ class MemoryRepository {
         }
       }
 
-      // Handle multimedia uploads
       if (files.multimedia) {
         const multimediaFiles = Array.isArray(files.multimedia)
           ? files.multimedia
@@ -170,7 +167,7 @@ class MemoryRepository {
 
       return updatedMemory;
     } catch (error) {
-      console.error(error.message);
+      throw error;
     }
   }
 
@@ -207,7 +204,6 @@ class MemoryRepository {
         createdBy: userId,
       });
     } catch (error) {
-      console.error("Error deleting memory:", error);
       throw error;
     }
   }
@@ -223,7 +219,7 @@ class MemoryRepository {
       if (!memory) throw new Error("No memory found with this id");
       return memory;
     } catch (error) {
-      console.error(error.message);
+      throw error;
     }
   }
 
@@ -235,7 +231,7 @@ class MemoryRepository {
       });
       return memories;
     } catch (error) {
-      console.error(error.message);
+      throw error;
     }
   }
 }

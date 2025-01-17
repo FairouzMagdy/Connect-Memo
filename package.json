@@ -10,6 +10,7 @@
   "description": "Connect Memo is a project to connect people memories along with other people.",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "connectmemo": "file:",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-fileupload": "^1.5.1",
