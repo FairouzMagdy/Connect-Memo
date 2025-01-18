@@ -27,7 +27,6 @@ class AuthRepository {
       const user = await User.findOne({ email }).select("+password");
       if (!user || !(await user.correctPassword(password, user.password)))
         throw new Error("Invalid username or password!");
-
       return user;
     } catch (error) {
       throw error;

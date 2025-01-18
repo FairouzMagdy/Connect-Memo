@@ -30,7 +30,7 @@ class UserController {
       .route("/users/:userId")
       .get(this.getUser)
       .patch(AuthMiddleware.restrictTo("admin"), this.updateUser)
-      .delete(AuthMiddleware.restrictTo("admin"), this.deleteUser);
+      .delete([AuthMiddleware.deleteUserPermissionMiddleware], this.deleteUser);
   }
 
   async getAllUsers(req, res, next) {

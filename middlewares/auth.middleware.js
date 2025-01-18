@@ -3,6 +3,8 @@ const { APP_CONFIG } = require("../config/app.config");
 const { promisify } = require("util");
 const UserRepository = require("../repos/user.repo");
 
+const permissionModel = require("../models/permission.model");
+
 class AuthMiddleware {
   async protect(req, res, next) {
     try {
@@ -44,6 +46,95 @@ class AuthMiddleware {
         res.status(400).json({ status: "fail", message: error.message });
       }
     };
+  }
+
+  async deleteUserPermissionMiddleware(req, res, next) {
+    const userDeletePermission = await permissionModel.findOne({
+      resource: "user",
+      action: "delete",
+      effect: "allow",
+    });
+
+    if (!userDeletePermission) {
+      return res.status(403).json({
+        message: "You don't have permission to delete a user",
+      });
+    }
+
+    const claims = req.user;
+
+    const isAuthorizedToDeleteUser =
+      userDeletePermission.condition.role.IN.includes(claims.role);
+
+    if (!isAuthorizedToDeleteUser) {
+      return res.status(403).json({
+        message: "You don't have permission to delete a user",
+      });
+    }
+
+    next();
+  }
+
+  async createPermissionMiddleware(req, res, next) {
+    try {
+      const createPermission = await permissionModel.findOne({
+        resource: "permission",
+        action: "create",
+        effect: "allow",
+      });
+
+      if (!createPermission) {
+        return res.status(403).json({
+          message: "You don't have permission to create a permission",
+        });
+      }
+
+      const claims = req.user;
+
+      const isAuthorizedToCreatePermission =
+        createPermission.condition.role.IN.includes(claims.role);
+
+      if (!isAuthorizedToCreatePermission) {
+        return res.status(403).json({
+          message: "You don't have permission to create a permission",
+        });
+      }
+
+      next();
+    } catch (error) {
+      next(error); // Forward any unexpected errors to error-handling middleware
+    }
+  }
+
+  async getPermissionsMiddleware(req, res, next) {
+    try {
+      const getPermission = await permissionModel.findOne({
+        resource: "permission",
+        action: "get",
+        effect: "allow",
+      });
+
+      if (!getPermission) {
+        return res.status(403).json({
+          message: "You don't have permission to view permissions",
+        });
+      }
+
+      const claims = req.user;
+
+      const isAuthorizedToViewPermissions =
+        getPermission.condition.role.IN.includes(claims.role);
+
+      if (!isAuthorizedToViewPermissions) {
+        return res.status(403).json({
+          message: "You don't have permission to view permissions",
+        });
+      }
+
+      next();
+    } catch (error) {
+      next(error); // Forward any unexpected errors to error-handling middleware
+    }
   }
 }
 
