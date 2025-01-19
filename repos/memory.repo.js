@@ -1,5 +1,6 @@
 const Memory = require("../models/memory.model");
 const Connection = require("../models/connection.model");
+const User = require("../models/user.model");
 const { mediaService } = require("../services/media.service");
 const { imageKitPayloadBuilder } = require("../utils/media.util");
 
@@ -223,16 +224,32 @@ class MemoryRepository {
 
   async shareMemoryWithUser(memoryId, currentUserId, userId) {
     try {
+      const recipient = await User.findById(userId);
+      if (!recipient) {
+        throw new Error(
+          "The user you are trying to share with does not exist."
+        );
+      }
+
       const connection = await Connection.findOne({
         $or: [
           { from: currentUserId, to: userId },
           { from: userId, to: currentUserId },
         ],
-        status: "blocked",
       });
 
-      if (connection) {
-        throw new Error("Cannot share memory with a blocked user");
+      if (!connection) {
+        throw new Error("You are not connected to this user.");
+      }
+
+      if (connection.status === "blocked") {
+        throw new Error("Cannot share memory with a blocked user.");
+      }
+
+      if (connection.status !== "accepted") {
+        throw new Error(
+          "You can only share memories with your accepted connections."
+        );
       }
 
       const memory = await Memory.findOneAndUpdate(
@@ -241,10 +258,15 @@ class MemoryRepository {
         { new: true, runValidators: true }
       ).populate("privacy.sharedWith");
 
-      if (!memory) throw new Error("No memory found with this id");
+      if (!memory) {
+        throw new Error("No memory found with this id.");
+      }
+
       return memory;
     } catch (error) {
-      throw error;
+      throw new Error(
+        error.message || "An error occurred while sharing memory."
+      );
     }
   }
 

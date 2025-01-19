@@ -1,5 +1,7 @@
 const User = require("../models/user.model");
 const Memory = require("../models/memory.model");
+const Connection = require("../models/connection.model");
+const mongoose = require("mongoose");
 
 class UserRepository {
   async getAllUsers() {

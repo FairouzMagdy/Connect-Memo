@@ -86,7 +86,7 @@ class ConnectionRepository {
     try {
       const connection = await Connection.findOne({
         _id: connectionId,
-        to: userId,
+        $or: [{ from: userId }, { to: userId }],
       });
 
       if (!connection) throw new Error("No connection found with this id");
