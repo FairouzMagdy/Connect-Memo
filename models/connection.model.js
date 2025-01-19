@@ -28,6 +28,9 @@ const ConnectionSchema = new mongoose.Schema(
   }
 );
 
+ConnectionSchema.index({ from: 1, to: 1 });
+ConnectionSchema.index({ status: 1 });
+
 const Connection = mongoose.model("Connection", ConnectionSchema);
 
 module.exports = Connection;

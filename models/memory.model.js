@@ -74,6 +74,9 @@ const MemorySchema = new mongoose.Schema(
   }
 );
 
+MemorySchema.index({ createdBy: 1 });
+MemorySchema.index({ "privacy.sharedWith": 1 });
+
 MemorySchema.pre(/^find/, function () {
   this.populate({
     path: "viewedBy createdBy privacy.sharedWith",

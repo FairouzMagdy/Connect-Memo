@@ -1,4 +1,5 @@
 const User = require("../models/user.model");
+const Memory = require("../models/memory.model");
 
 class UserRepository {
   async getAllUsers() {
@@ -60,11 +61,35 @@ class UserRepository {
   }
 
   async deleteUser(userId) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
-      const user = await User.findByIdAndDelete({ _id: userId });
+      const user = await User.findById({ _id: userId }).session(session);
       if (!user) throw new Error("No user found with this id");
+
+      // Delete Memories
+      await Memory.deleteMany({ createdBy: userId }).session(session);
+      await Memory.updateMany(
+        { "privacy.sharedWith": userId },
+        { $pull: { "privacy.sharedWith": userId } }
+      ).session(session);
+
+      // Delete Connections
+      await Connection.deleteMany({
+        $or: [{ from: userId }, { to: userId }],
+      }).session(session);
+
+      // Delete User
+      await User.findByIdAndDelete({ _id: userId }).session(session);
+
+      await session.commitTransaction();
+      session.endSession();
+
       return user;
     } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
       throw error;
     }
   }
